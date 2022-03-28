@@ -1,6 +1,6 @@
 {
 	"name": "@tzxhy/vite-plugin-shaking-css-module",
-	"version": "1.0.0-alpha.0",
+	"version": "1.0.0-alpha.1",
 	"main": "dist/index.js",
 	"scripts": {
 		"start": "tsc --watch",

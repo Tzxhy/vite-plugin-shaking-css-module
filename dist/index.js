@@ -4,6 +4,7 @@ var tslib_1 = require("tslib");
 var core_1 = require("@babel/core");
 var t = tslib_1.__importStar(require("@babel/types"));
 var crypto_1 = tslib_1.__importDefault(require("crypto"));
+var is_1 = require("./src/utils/is");
 function getRecurMemberExpressionName(path) {
     if (t.isMemberExpression(path)) {
         var ret = [];
@@ -18,7 +19,9 @@ function getRecurMemberExpressionName(path) {
         if (t.isIdentifier(path.node.property)) {
             ret.push(path.node.property.name);
         }
-        return ret;
+        if (ret.length === 2) {
+            return ret;
+        }
     }
     return [];
 }
@@ -42,6 +45,8 @@ function TreeShakingModuleCss() {
                 var data = (0, core_1.transformSync)(code, {
                     ast: true,
                 });
+                var TEMPLATE_PREFIX_1 = 'template:';
+                var SCRIPT_PREFIX_1 = 'script:';
                 var cssRefMap_1 = new Map();
                 var cssRefVar_1 = '';
                 (0, core_1.traverse)((_a = data === null || data === void 0 ? void 0 : data.ast) === null || _a === void 0 ? void 0 : _a.program, {
@@ -50,8 +55,16 @@ function TreeShakingModuleCss() {
                             var childObj = path.node.object;
                             if (t.isMemberExpression(childObj) && childObj.object) {
                                 if (t.isIdentifier(childObj.object) && (childObj.object.name === '_ctx' || childObj.object.name === '$setup')) {
-                                    cssRefMap_1.set(getRecurMemberExpressionName(path).join('.'), 1);
+                                    cssRefMap_1.set(TEMPLATE_PREFIX_1 + getRecurMemberExpressionName(path).join('.'), 1);
                                 }
+                            }
+                        }
+                        else if (t.isVariableDeclaration(path)) {
+                            var map = (0, is_1.getCallUseCssModuleRef)(path);
+                            if (map) {
+                                map.forEach(function (_, key) {
+                                    cssRefMap_1.set(SCRIPT_PREFIX_1 + key, 1);
+                                });
                             }
                         }
                     },
@@ -71,11 +84,13 @@ function TreeShakingModuleCss() {
                         }
                     },
                 });
-                // 只包含 css 引用的名称
                 var afterCss_1 = new Map();
                 cssRefMap_1.forEach(function (val, key) {
-                    if (key.includes(cssRefVar_1)) {
-                        afterCss_1.set(key.replace(cssRefVar_1 + '.', ''), val);
+                    if (key.indexOf(TEMPLATE_PREFIX_1) === 0 && key.slice(TEMPLATE_PREFIX_1.length).indexOf(cssRefVar_1) === 0) {
+                        afterCss_1.set(key.replace(TEMPLATE_PREFIX_1 + cssRefVar_1 + '.', ''), val);
+                    }
+                    else if (key.indexOf(SCRIPT_PREFIX_1) === 0) {
+                        afterCss_1.set(key.split('.')[1], val);
                     }
                 });
                 cache.set(id, afterCss_1);

@@ -6,6 +6,7 @@ import {
 import * as t from '@babel/types';
 import { Identifier, MemberExpression, VariableDeclaration } from '@babel/types';
 import crypto from 'crypto';
+import { getCallUseCssModuleRef } from './src/utils/is';
 
 
 function getRecurMemberExpressionName(path: NodePath): string[] {
@@ -22,8 +23,9 @@ function getRecurMemberExpressionName(path: NodePath): string[] {
 		if (t.isIdentifier((path.node as MemberExpression).property)) {
 			ret.push(((path.node as MemberExpression).property as Identifier).name);
 		}
-		return ret;
-
+		if (ret.length === 2) {
+			return ret;
+		}
 	}
 	return [];
 }
@@ -50,7 +52,8 @@ export default function TreeShakingModuleCss() {
 				const data = transformSync(code, {
 					ast: true,
 				});
-
+				const TEMPLATE_PREFIX = 'template:';
+				const SCRIPT_PREFIX = 'script:';
 				const cssRefMap = new Map<string, 1>();
 				let cssRefVar = '';
 				traverse(data?.ast?.program, {
@@ -59,8 +62,15 @@ export default function TreeShakingModuleCss() {
 							const childObj = (path.node as MemberExpression).object;
 							if (t.isMemberExpression(childObj) && childObj.object) {
 								if (t.isIdentifier(childObj.object) && (childObj.object.name === '_ctx' || childObj.object.name === '$setup')) {
-									cssRefMap.set(getRecurMemberExpressionName(path).join('.'), 1);
+									cssRefMap.set(TEMPLATE_PREFIX + getRecurMemberExpressionName(path).join('.'), 1);
 								}
+							}
+						} else if (t.isVariableDeclaration(path)) {
+							const map = getCallUseCssModuleRef(path);
+							if (map) {
+								map.forEach((_, key) => {
+									cssRefMap.set(SCRIPT_PREFIX + key, 1);
+								})
 							}
 						}
 					},
@@ -80,11 +90,12 @@ export default function TreeShakingModuleCss() {
 						}
 					},
 				});
-				// 只包含 css 引用的名称
 				const afterCss = new Map<string, 1>();
 				cssRefMap.forEach((val, key) => {
-					if (key.includes(cssRefVar)) {
-						afterCss.set(key.replace(cssRefVar + '.', ''), val);
+					if (key.indexOf(TEMPLATE_PREFIX) === 0 && key.slice(TEMPLATE_PREFIX.length).indexOf(cssRefVar) === 0) {
+						afterCss.set(key.replace(TEMPLATE_PREFIX + cssRefVar + '.', ''), val);
+					} else if (key.indexOf(SCRIPT_PREFIX) === 0) {
+						afterCss.set(key.split('.')[1], val);
 					}
 				});
 				cache.set(id, afterCss);
