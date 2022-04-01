@@ -98,6 +98,9 @@ function TreeShakingModuleCss() {
             else if (/.vue/.test(id) && id.includes('type=style') && id.includes('module')) {
                 // 删除无用代码
                 // 拆分 css module
+                if (!code) {
+                    return "";
+                }
                 var codes = splitCssModule(code);
                 var retCode_1 = [];
                 var vueModuleName = id.replace(/.vue[\s\S]+/, '.vue');

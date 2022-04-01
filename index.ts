@@ -102,6 +102,9 @@ export default function TreeShakingModuleCss() {
 			} else if (/.vue/.test(id) && id.includes('type=style') && id.includes('module')) {
 				// 删除无用代码
 				// 拆分 css module
+				if (!code) {
+					return "";
+				}
 				const codes = splitCssModule(code);
 				let retCode: string[] = [];
 				const vueModuleName = id.replace(/.vue[\s\S]+/, '.vue');
