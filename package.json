@@ -1,6 +1,6 @@
 {
 	"name": "@tzxhy/vite-plugin-shaking-css-module",
-	"version": "1.0.0-alpha.3",
+	"version": "1.0.0-alpha.5",
 	"main": "dist/index.js",
 	"scripts": {
 		"start": "tsc --watch",
@@ -20,5 +20,9 @@
 	"files": [
 		"dist/**",
 		"readme.md"
-	]
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Tzxhy/vite-plugin-shaking-css-module"
+	}
 }
