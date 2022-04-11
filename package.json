@@ -1,6 +1,7 @@
 {
 	"name": "@tzxhy/vite-plugin-shaking-css-module",
-	"version": "1.0.0-alpha.5",
+	"description": "用于去除vue3中未使用的css-module（vue3 css tree shaking）",
+	"version": "1.0.0-alpha.6",
 	"main": "dist/index.js",
 	"scripts": {
 		"start": "tsc --watch",
@@ -24,5 +25,10 @@
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/Tzxhy/vite-plugin-shaking-css-module"
-	}
+	},
+	"keywords":[
+		"vite-plugin",
+		"css module",
+		"tree shaking"
+	]
 }

@@ -1,5 +1,5 @@
 # vite-plugin-shaking-css-module
-用于去除 vue3 css module 中未引用的样式 （**css module tree shaking**）。
+用于去除 vue3 css module 中未引用的样式。
 
 例如：
 style.less 文件（独立 SFC 样式文件）：
@@ -65,7 +65,7 @@ body {
 }
 ```
 
-则打包后，css文件只会包含：.app， .app3，.app2 和非 SFC 样式。其余违背依赖的样式将被剔除，如：
+则打包后，css文件只会包含：.app， .app3，.app2 和非 SFC 样式。其余未被依赖的样式将被剔除，如：
 ```css
 #root{background-color:#00f}body{color:#666}._app3_368a9{background-color:#fff;color:#ff0}._app_b4102{font-family:Avenir,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-align:center;color:#2c3e50;margin-top:60px}._app2_87af3{margin-top:60px}
 
@@ -98,7 +98,7 @@ export default defineConfig((env) => {
 ```
 
 # 其他
-当前仅能分析出 template 和 script 中直接使用 CssModulesName.moduleName (或者 CssModulesName['moduleName]) 的形式获取依赖；对于动态求值类型，无法计算。当出现这种情况时，可以在 script 中增加引用，如：
+当前仅能分析出 template 和 script 中直接使用 CssModulesName.moduleName (或者 CssModulesName['moduleName]) 和 useCssModule 的形式获取依赖；对于动态求值类型，无法计算。当出现这种情况时，可以在 script 中增加引用，如：
 ```vue
 <template>
 	<div :class="'dynamicModule' + no" />
@@ -115,3 +115,6 @@ const no = ref(1); // 1 或者 2
 (css.dynamicModule1, css.dynamicModule2);
 </script>
 ```
+
+# 贡献&提问
+如有问题，可以在[仓库](https://github.com/Tzxhy/vite-plugin-shaking-css-module)内提issue。欢迎共建。
